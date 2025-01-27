@@ -23,62 +23,6 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-// Endpoint para realizar scraping con fechas
-app.MapGet("/scraping/test", async (ScrapingService scrapingService,
-    [FromQuery] string authUrl,
-    [FromQuery] string startDate,
-    [FromQuery] string endDate) =>
-{
-    // Validar que el parámetro authUrl no esté vacío
-    if (string.IsNullOrEmpty(authUrl))
-    {
-        return Results.BadRequest("El parámetro 'authUrl' es requerido.");
-    }
-
-    // Validar que las fechas no estén vacías
-    if (string.IsNullOrEmpty(startDate) || string.IsNullOrEmpty(endDate))
-    {
-        return Results.BadRequest("Los parámetros 'startDate' y 'endDate' son requeridos.");
-    }
-
-    // Validar el formato de las fechas (opcional)
-    if (!DateTime.TryParse(startDate, out var parsedStartDate) || !DateTime.TryParse(endDate, out var parsedEndDate))
-    {
-        return Results.BadRequest("Los parámetros 'startDate' y 'endDate' deben tener un formato válido (YYYY-MM-DD).");
-    }
-
-    // Validar que startDate no sea mayor a endDate
-    if (parsedStartDate > parsedEndDate)
-    {
-        return Results.BadRequest("'startDate' no puede ser mayor a 'endDate'.");
-    }
-
-    try
-    {
-        // Llamar al servicio de scraping con los parámetros
-        var extractedData = await scrapingService.AuthenticateAndNavigateAsync(authUrl, parsedStartDate.ToString("yyyy-MM-dd"), parsedEndDate.ToString("yyyy-MM-dd"));
-
-        if (extractedData != null && extractedData.Count > 0)
-        {
-            return Results.Ok(new
-            {
-                message = "Scraping completado exitosamente",
-                data = extractedData
-            });
-        }
-        else
-        {
-            return Results.Ok(new { message = "No se encontraron datos en el rango de fechas proporcionado." });
-        }
-    }
-    catch (Exception ex)
-    {
-        return Results.Problem($"Ocurrió un error al realizar el scraping: {ex.Message}");
-    }
-})
-.WithName("TestScrapingWithDates")
-.WithOpenApi();
-
 app.MapPost("/tabledownload/full", async (TableDownloadService tableDownloadService,
     [FromQuery] string authUrl,
     [FromQuery] string startDate,
@@ -120,51 +64,6 @@ app.MapPost("/tabledownload/full", async (TableDownloadService tableDownloadServ
 })
 .WithName("FullTableDownload")
 .WithOpenApi();
-
-
-
-
-
-// Endpoint para descargar archivos basados en el scraping
-app.MapPost("/file/download-test", async (FileDownloadService fileDownloadService,
-    [FromQuery] string authUrl,
-    [FromQuery] string trackId,
-    [FromQuery] string? downloadPath) =>
-{
-    if (string.IsNullOrEmpty(authUrl))
-    {
-        return Results.BadRequest("El parámetro 'authUrl' es requerido.");
-    }
-    if (string.IsNullOrEmpty(trackId))
-    {
-        return Results.BadRequest("El parámetro 'trackId' es requerido.");
-    }
-
-    // Ruta por defecto si no se proporciona downloadPath
-    string defaultDownloadPath = Path.Combine(Directory.GetCurrentDirectory(), "Downloads");
-    downloadPath ??= defaultDownloadPath;
-
-    bool result = await fileDownloadService.AuthenticateAndDownloadFileAsync(authUrl, trackId, downloadPath);
-
-
-    if (result)
-    {
-        return Results.Ok(new
-        {
-            message = "Archivo descargado y guardado exitosamente",
-            filePath = Path.Combine(downloadPath, "prueba.zip")
-        });
-    }
-    else
-    {
-        return Results.BadRequest("Error al descargar o guardar el archivo.");
-    }
-})
-.WithName("DownloadTestFile")
-.WithOpenApi();
-
-
-
 
 app.Run();
 
