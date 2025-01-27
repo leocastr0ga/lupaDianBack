@@ -1,0 +1,21 @@
+cd C:\LUPA\diantokensearch\diantokensearchback
+
+taskkill /IM diantokensearchback.exe /F
+dotnet build
+
+dotnet clean
+
+dotnet build
+
+
+dotnet dev-certs https --trust
+
+dotnet run --launch-profile https
+
+dotnet run
+
+https://localhost:7042/swagger/index.html
+
+
+2024/11/01
+2024/12/31
