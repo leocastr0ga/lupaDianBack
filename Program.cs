@@ -8,9 +8,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// Registrar servicios
-builder.Services.AddSingleton<ScrapingService>();
-builder.Services.AddSingleton<FileDownloadService>(); // Nuevo servicio para manejar descargas
+// Registrar servicios necesarios
 
 var app = builder.Build();
 

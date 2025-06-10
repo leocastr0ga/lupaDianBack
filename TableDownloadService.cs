@@ -6,7 +6,8 @@ using System.Net.Http;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using System.IO.Compression; 
+using System.IO.Compression;
+using System.Linq;
 
 namespace diantokensearchback.Services
 {
